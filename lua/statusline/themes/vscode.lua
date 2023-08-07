@@ -5,23 +5,18 @@ local M = {}
 -- replace empty strings
 local function sub_empty(emp, sub)
 	sub = sub or "?"
-	if emp == "" or emp == nil then
-		return sub
-	end
+	if emp == "" or emp == nil then return sub end
 	return emp
 end
 
 M.mode = function()
 	local m = C.get_mode()
-	return C.join(" ", { m.highlight .. "", m.mode })
+	return C.join(" ", { m.highlight .. Statusline.opts.mode_icon, m.mode })
 end
 
 M.file_info = function()
 	local info = C.file_info()
-	return C.join(
-		" ",
-		{ "%#StLineFileInfo#" .. info.icon, sub_empty(info.name) }
-	)
+	return C.join(" ", { "%#StLineFileInfo#" .. info.icon, sub_empty(info.name) })
 end
 
 M.filetype = function()
@@ -32,25 +27,24 @@ end
 M.git_branch = function()
 	local branch = C.get_branch()
 	if branch ~= "" then
-		return C.join(" ", { "%#StLineGitBranch#", "", branch })
+		return C.join(
+			" ",
+			{ "%#StLineGitBranch#", Statusline.opts.git_branch_icon, branch }
+		)
 	end
 	return ""
 end
 
 M.git_changes = function()
-	if vim.o.columns < 120 then
-		return ""
-	end
+	if vim.o.columns < Statusline.opts.git_changes_min_width then return "" end
 	local changes = C.get_changes()
-	if not changes then
-		return ""
-	end
+	if not changes then return "" end
 	local highlights = {
 		added = "%#StLineLSPInfo#",
 		changed = "%#StLineLSPWarning#",
 		removed = "%#StLineLSPError#",
 	}
-	local icons = { added = "", changed = "", removed = "" }
+	local icons = Statusline.opts.git_changes_icons
 	local result = {}
 	for k, v in pairs(changes) do
 		if v > 0 then
@@ -63,15 +57,10 @@ end
 
 -- LSP STUFF
 M.LSP_progress = function()
-	if vim.o.columns < 120 then
-		return ""
-	end
+	if vim.o.columns < Statusline.opts.LSP_progress_min_width then return "" end
 	local progress = C.LSP_message()
-	if progress == "" then
-		return ""
-	end
-	local spinners =
-		{ "", "󰪞", "󰪟", "󰪠", "󰪢", "󰪣", "󰪤", "󰪥" }
+	if progress == "" then return "" end
+	local spinners = Statusline.opts.LSP_spinners
 	local content = string.format(
 		" %%<%s %s %s (%s%%%%) ",
 		spinners[C.get_cyclic_counter(#spinners) + 1],
@@ -88,11 +77,9 @@ M.LSP_progress = function()
 end
 
 M.LSP_diagnostics = function()
-	if vim.o.columns <= 0 then
-		return ""
-	end
+	if vim.o.columns <= 0 then return "" end
 	local counts = C.LSP_severities()
-	local icons = { error = "󰅚", warn = "", hint = "󰛩", info = "" }
+	local icons = Statusline.opts.diagnostics_icons
 	local diagnostics = C.join(" ", {
 		"%#StLineLspError#" .. icons.error,
 		sub_empty(counts.error_count),
@@ -122,34 +109,37 @@ M.LSP_diagnostics = function()
 end
 
 function M.cursor_position()
-	if vim.o.columns > 140 then
-		return "%#StLineText#Ln %l/%L, Cl %c"
-	end
-	return ""
-end
-
-function M.LSP_status()
-	local client = C.LSP_client()
-	if client == "" then
-		return ""
-	end
-	if vim.o.columns > 100 then
-		return C.join(" ", { "%#StLineLspStatus#", "󰄭", client })
-	end
-	return C.join(" ", { "%#StLineLspStatus#", "󰄭", "LSP" })
+	if vim.o.columns < Statusline.opts.position_min_width then return "" end
+	-- if vim.o.columns > 140 then
+	return "%#StLineText#Ln %l/%L, Cl %c"
+	-- end
+	-- return ""
 end
 
 function M.file_encoding()
 	local encoding = string.upper(vim.bo.fileencoding)
-	if encoding == "" then
-		return encoding
-	end
+	if encoding == "" then return encoding end
 	return C.join(" ", { "%#StLineEncode#", encoding })
+end
+
+function M.LSP_status()
+	local client = C.LSP_client()
+	if client == "" then return "" end
+	if vim.o.columns > 100 then
+		return C.join(
+			" ",
+			{ "%#StLineLspStatus#", Statusline.opts.LSP_icon, client }
+		)
+	end
+	return C.join(" ", { "%#StLineLspStatus#", Statusline.opts.LSP_icon, "LSP" })
 end
 
 M.cwd = function()
 	if vim.o.columns > 85 then
-		return C.join(" ", { "%#StLineCwd# 󰉖", C.get_cwd() })
+		return C.join(
+			" ",
+			{ "%#StLineCwd#", Statusline.opts.cwd_icon, C.get_cwd() }
+		)
 	end
 	return ""
 end
@@ -160,7 +150,8 @@ function M.run()
 	-- if opts.overriden_modules then
 	-- M = vim.tbl_deep_extend("force", M, opts.overriden_modules())
 	-- end
-	local left = table.concat({
+	-- pad adds space inside the highlight delimeter
+	local left = C.join("", {
 		C.pad(M.mode()),
 		C.pad(M.file_info()),
 		C.pad(M.git_branch()),

@@ -41,4 +41,3 @@ return {
 	["x"] = { "CONFIRM", "StLineConfirmMode" },
 	["!"] = { "SHELL", "StLineTerminalMode" },
 }
-
