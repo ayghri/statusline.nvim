@@ -44,7 +44,7 @@ M.get_cwd = function() return fn.fnamemodify(fn.getcwd(), ":t") end
 
 -- returns the filename and find a icon for filetype, uses web-devicons
 M.file_info = function()
-  local icon = Statusline.opts.default_file_icon
+  local icon = Statusline.opts.icons.default_file
   local filename = (fn.expand("%") == "" and "") or fn.expand("%:t")
 
   if filename ~= "" then

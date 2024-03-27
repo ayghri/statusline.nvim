@@ -22,12 +22,11 @@ to use filetype specific icons.
 ```lua
 {
   "aghriss/statusline.nvim",
-  lazy = false,
   opts = {
         theme = "vscode"
   },
   dependencies = {
-   "nvim-tree/nvim-web-devicons", -- for file name icon
+   "nvim-tree/nvim-web-devicons", -- for file name icon, optional
   },
 
 ```
@@ -35,36 +34,38 @@ to use filetype specific icons.
 ## Defaults
 
 ```lua
- defaults = {
-  theme = "vscode",
+require("base46").setup(
+    theme = "vscode",
     position_min_width = 140,
-  overriden_modules = false,
-  lsprogress_len = nil,
-  default_file_icon = "󰈚",
-  mode_icon = "",
-  git_branch_icon = "",
-  LSP_icon = "󰄭",
-  git_changes_min_width = 120,
-  LSP_progress_min_width = 120,
-  cwd_icon = "󰉖",
-  git_changes_icons = { added = "", changed = "", removed = "" },
-  diagnostics_icons = {
-   error = "󰅚",
-   warn = "",
-   hint = "󰛩",
-   info = "",
-  },
-  LSP_spinners = {
-   "",
-   "󰪞",
-   "󰪟",
-   "󰪠",
-   "󰪢",
-   "󰪣",
-   "󰪤",
-   "󰪥",
-  },
-
+    overriden_modules = false,
+    lsprogress_len = nil,
+    git_changes_min_width = 120,
+    LSP_progress_min_width = 120,
+    icons = {
+      modified = "",
+      mode = "",
+      default_file = "󰈚",
+      git_branch = "",
+      cwd = "󰉖",
+      git_changes = { added = "", changed = "", removed = "" },
+      lsp = "󰄭",
+      diagnostics = {
+        error = "󰅚",
+        warn = "",
+        hint = "󰛩",
+        info = "",
+      },
+      spinners = {
+        "",
+        "󰪞",
+        "󰪟",
+        "󰪠",
+        "󰪢",
+        "󰪣",
+        "󰪤",
+        "󰪥",
+      },
+    })
 ```
 
 ## Demo
